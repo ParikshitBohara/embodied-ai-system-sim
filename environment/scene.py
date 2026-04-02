@@ -1,0 +1,57 @@
+from typing import Dict, Tuple
+import pybullet as p
+
+
+def create_basic_scene() -> Dict[str, int]:
+
+    plane_id = add_plane()
+    table_id = add_table()
+    cube_id = spawn_cube(position=(0.5, 0.0, 0.65))
+    target_zone_id = spawn_target_zone(position=(0.6, -0.25, 0.62))
+
+    return {
+        "plane_id": plane_id,
+        "table_id": table_id,
+        "cube_id": cube_id,
+        "target_zone_id": target_zone_id,
+    }
+
+
+def add_plane() -> int:
+    return p.loadURDF("plane.urdf")
+
+
+def add_table(position: Tuple[float, float, float] = (0.5, 0.0, 0.0)) -> int:
+    return p.loadURDF("table/table.urdf", basePosition=position, useFixedBase=True)
+
+
+def spawn_cube(position: Tuple[float, float, float]) -> int:
+    cube_half_extents = [0.025, 0.025, 0.025]
+    collision_shape = p.createCollisionShape(p.GEOM_BOX, halfExtents=cube_half_extents)
+    visual_shape = p.createVisualShape(
+        p.GEOM_BOX,
+        halfExtents=cube_half_extents,
+        rgbaColor=[1.0, 0.2, 0.2, 1.0],
+    )
+    return p.createMultiBody(
+        baseMass=0.1,
+        baseCollisionShapeIndex=collision_shape,
+        baseVisualShapeIndex=visual_shape,
+        basePosition=position,
+    )
+
+
+def spawn_target_zone(position: Tuple[float, float, float]) -> int:
+    zone_half_extents = [0.08, 0.08, 0.005]
+    collision_shape = p.createCollisionShape(p.GEOM_BOX, halfExtents=zone_half_extents)
+    visual_shape = p.createVisualShape(
+        p.GEOM_BOX,
+        halfExtents=zone_half_extents,
+        rgbaColor=[0.2, 0.8, 0.2, 0.7],
+    )
+    return p.createMultiBody(
+        baseMass=0.0,
+        baseCollisionShapeIndex=collision_shape,
+        baseVisualShapeIndex=visual_shape,
+        basePosition=position,
+    )
