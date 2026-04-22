@@ -33,3 +33,8 @@ Perception -> Task Logic -> Robot Control -> Execution
 - Implement dynamic task selection
 - Add support for multiple objects
 - Improve automation using AI-based decision making
+
+  ## Sprint 3 Progress
+- Started planning integration between task logic and robot module  
+- Identified robot movement instability (spinning issue)  
+- Preparing for module integration and testing  
