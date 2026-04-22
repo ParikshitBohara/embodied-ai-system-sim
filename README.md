@@ -46,4 +46,5 @@ This launches a PyBullet GUI scene with:
 - Initial planning for integration between modules  
 - Identified robot instability issue (spinning)  
 - Created GitHub issues for Sprint 3 tasks  
-- Preparing for integration and testing phase  
+- Preparing for integration and testing phase
+- Documented identified system issue (robot instability)  
