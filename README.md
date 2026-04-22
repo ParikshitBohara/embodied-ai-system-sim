@@ -40,3 +40,10 @@ This launches a PyBullet GUI scene with:
 
 ⏭️ **Next Milestone**
 - Implement robot motion + inverse kinematics for basic pick and place behavior.
+
+
+## Sprint 3 Progress
+- Initial planning for integration between modules  
+- Identified robot instability issue (spinning)  
+- Created GitHub issues for Sprint 3 tasks  
+- Preparing for integration and testing phase  
