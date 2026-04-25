@@ -27,7 +27,6 @@ def _body_position(body_id: int) -> tuple[float, float, float]:
 
 
 def perceive_cube_position() -> tuple[float, float, float] | None:
-    """Use the simulated camera and OpenCV detector to estimate the cube pose."""
     camera_config = get_top_down_camera_config()
     camera_frame = capture_camera_frame(
         width=int(camera_config["width"]),
@@ -54,7 +53,6 @@ def perceive_cube_position() -> tuple[float, float, float] | None:
 
 
 def perceive_sortable_objects() -> list[dict[str, object]]:
-    """Use the simulated camera and OpenCV detector to locate all sortable objects."""
     camera_config = get_top_down_camera_config()
     camera_frame = capture_camera_frame(
         width=int(camera_config["width"]),
@@ -98,7 +96,6 @@ def execute_pick_sequence(
     object_id: int,
     object_position: tuple[float, float, float] | None = None,
 ) -> None:
-    """Approach an object, grasp it, and lift it."""
     object_x, object_y, object_z = object_position or _body_position(object_id)
 
     gripper.open()
@@ -114,7 +111,6 @@ def execute_place_sequence(
     gripper: SimulatedGripper,
     target_zone_id: int,
 ) -> None:
-    """Move above the target marker and release the simulated grasp."""
     target_x, target_y, target_z = _body_position(target_zone_id)
 
     _move_and_wait(robot_id, (target_x, target_y, target_z + APPROACH_HEIGHT))
@@ -125,7 +121,6 @@ def execute_place_sequence(
 
 
 def run_pick_and_place_workflow(robot_id: int, cube_id: int, target_zone_id: int) -> None:
-    """Run a simple pick-and-place workflow in simulation."""
     print("Starting pick-and-place workflow...")
     move_to_home(robot_id)
     step_simulation(240)
@@ -144,8 +139,8 @@ def run_sorting_workflow(
     robot_id: int,
     object_bodies: dict[str, int],
     target_zones: dict[str, int],
+    target_assignments: dict[str, str] | None = None,
 ) -> None:
-    """Sort multiple detected objects into class-specific target zones."""
     print("Starting OpenCV sorting workflow...")
     move_to_home(robot_id)
     step_simulation(240)
@@ -153,10 +148,12 @@ def run_sorting_workflow(
     gripper = SimulatedGripper(robot_id)
     detections = perceive_sortable_objects()
     detections_by_class = _detections_by_class(detections)
+    assignments = target_assignments or {}
 
     for class_name in SORT_ORDER:
         object_id = object_bodies[class_name]
-        target_zone_id = target_zones[class_name]
+        target_class_name = assignments.get(class_name, class_name)
+        target_zone_id = target_zones[target_class_name]
         detection = detections_by_class.get(class_name)
 
         if detection is None:
@@ -165,7 +162,7 @@ def run_sorting_workflow(
         else:
             object_position = detection["world_position"]
 
-        print(f"[INFO] Sorting {class_name} into its target zone.")
+        print(f"[INFO] Sorting {class_name} into {target_class_name} target zone.")
         execute_pick_sequence(robot_id, gripper, object_id, object_position)
         execute_place_sequence(robot_id, gripper, target_zone_id)
 
