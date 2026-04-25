@@ -14,7 +14,7 @@ def create_basic_scene() -> Dict[str, int]:
     table_id = add_table()
     cube_z = TABLE_SURFACE_Z + 0.025          # surface + half-extent
     zone_z = TABLE_SURFACE_Z + 0.005          # surface + half-extent of flat zone
-    cube_id = spawn_cube(position=(0.5, 0.0, cube_z))
+    cube_id = spawn_cube(position=(0.5, 0.25, cube_z))
     target_zone_id = spawn_target_zone(position=(0.6, -0.25, zone_z))
 
     return {
