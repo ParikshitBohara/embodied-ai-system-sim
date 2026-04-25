@@ -3,9 +3,11 @@ from typing import Dict, List
 import cv2
 import numpy as np
 
+from perception.camera_utils import pixel_to_world
+
 
 def detect_red_cube(rgb_image: np.ndarray) -> List[Dict[str, object]]:
-    """Detect red cube in an RGB image."""
+
     results = []
 
     hsv = cv2.cvtColor(rgb_image, cv2.COLOR_RGB2HSV)
@@ -48,3 +50,41 @@ def detect_red_cube(rgb_image: np.ndarray) -> List[Dict[str, object]]:
 
     results.sort(key=lambda x: x["area"], reverse=True)
     return results
+
+
+def estimate_red_cube_world_position(
+    rgb_image: np.ndarray,
+    depth_image: np.ndarray,
+    camera_config: Dict[str, object],
+    cube_center_z: float,
+) -> Dict[str, object] | None:
+
+    detections = detect_red_cube(rgb_image)
+    if not detections:
+        return None
+
+    detection = detections[0]
+    center_x, center_y = detection["center"]
+    x1, y1, x2, y2 = detection["bbox"]
+    depth_region = depth_image[y1:y2, x1:x2]
+    valid_depth_values = depth_region[(depth_region > 0.0) & (depth_region < 1.0)]
+    if valid_depth_values.size == 0:
+        depth_value = float(depth_image[center_y, center_x])
+    else:
+        depth_value = float(np.median(valid_depth_values))
+
+    world_x, world_y, _ = pixel_to_world(
+        pixel_x=center_x,
+        pixel_y=center_y,
+        depth_value=depth_value,
+        width=int(camera_config["width"]),
+        height=int(camera_config["height"]),
+        view_matrix=camera_config["view_matrix"],
+        projection_matrix=camera_config["projection_matrix"],
+    )
+
+    return {
+        **detection,
+        "world_position": (world_x, world_y, cube_center_z),
+        "depth_value": depth_value,
+    }
