@@ -11,10 +11,10 @@ def get_top_down_camera_config() -> Dict[str, object]:
     width = 640
     height = 480
 
-    camera_target = [0.5, 0.0, 0.62]
-    camera_distance = 0.55
+    camera_target = [0.55, 0.0, 0.62]
+    camera_distance = 0.9
     yaw = 90
-    pitch = -70
+    pitch = -88
     roll = 0
     up_axis_index = 2
 
