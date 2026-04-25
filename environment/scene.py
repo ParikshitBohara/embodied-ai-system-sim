@@ -6,16 +6,15 @@ import pybullet as p
 # Expose this so other modules (e.g. main.py) can mount the robot flush
 # to the table top without hard-coding the magic number in multiple places.
 TABLE_SURFACE_Z: float = 0.625
-
+CUBE_START_POSITION: Tuple[float, float, float] = (0.5, 0.25, TABLE_SURFACE_Z + 0.025)
+TARGET_ZONE_POSITION: Tuple[float, float, float] = (0.6, -0.25, TABLE_SURFACE_Z + 0.005)
 
 def create_basic_scene() -> Dict[str, int]:
 
     plane_id = add_plane()
     table_id = add_table()
-    cube_z = TABLE_SURFACE_Z + 0.025          # surface + half-extent
-    zone_z = TABLE_SURFACE_Z + 0.005          # surface + half-extent of flat zone
-    cube_id = spawn_cube(position=(0.5, 0.25, cube_z))
-    target_zone_id = spawn_target_zone(position=(0.6, -0.25, zone_z))
+    cube_id = spawn_cube(position=CUBE_START_POSITION)
+    target_zone_id = spawn_target_zone(position=TARGET_ZONE_POSITION)
 
     return {
         "plane_id": plane_id,
