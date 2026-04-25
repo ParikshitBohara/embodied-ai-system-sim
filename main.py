@@ -3,9 +3,18 @@ import time
 import pybullet as p
 import pybullet_data
 
-from environment.scene import create_basic_scene, TABLE_SURFACE_Z
+from environment.scene import CUBE_START_POSITION, create_basic_scene, TABLE_SURFACE_Z
+from robot.control import move_to_home, step_simulation
 from robot.robot_loader import load_robot
 from tasks.pick_place import run_pick_and_place_workflow
+
+
+def reset_demo(robot_id: int, cube_id: int) -> None:
+    """Reset the robot and cube so every retest starts from the same state."""
+    p.resetBasePositionAndOrientation(cube_id, CUBE_START_POSITION, [0, 0, 0, 1])
+    p.resetBaseVelocity(cube_id, linearVelocity=[0, 0, 0], angularVelocity=[0, 0, 0])
+    move_to_home(robot_id)
+    step_simulation(240)
 
 
 def main() -> None:
@@ -23,14 +32,23 @@ def main() -> None:
     print(f"Robot ID:       {robot_info['robot_id']}")
     print(f"Cube ID:        {scene['cube_id']}")
     print(f"Target Zone ID: {scene['target_zone_id']}")
-    run_pick_and_place_workflow(
-        robot_info["robot_id"],
-        scene["cube_id"],
-        scene["target_zone_id"],
-    )
+    run_button_id = p.addUserDebugParameter("Run pick-and-place", 1, 0, 0)
+    last_run_button_value = p.readUserDebugParameter(run_button_id)
+
+    reset_demo(robot_info["robot_id"], scene["cube_id"])
+    print("Click the 'Run pick-and-place' button in the PyBullet panel to retest.")
 
     try:
         while p.isConnected(physicsClientId=physics_client):
+            run_button_value = p.readUserDebugParameter(run_button_id)
+            if run_button_value != last_run_button_value:
+                last_run_button_value = run_button_value
+                reset_demo(robot_info["robot_id"], scene["cube_id"])
+                run_pick_and_place_workflow(
+                    robot_info["robot_id"],
+                    scene["cube_id"],
+                    scene["target_zone_id"],
+                )
             p.stepSimulation()
             time.sleep(1.0 / 240.0)
     except KeyboardInterrupt:
