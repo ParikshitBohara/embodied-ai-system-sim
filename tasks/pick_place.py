@@ -33,6 +33,8 @@ def perceive_cube_position() -> tuple[float, float, float] | None:
         height=int(camera_config["height"]),
         view_matrix=camera_config["view_matrix"],
         projection_matrix=camera_config["projection_matrix"],
+        near_val=float(camera_config["near_val"]),
+        far_val=float(camera_config["far_val"]),
     )
     detection = estimate_red_cube_world_position(
         rgb_image=camera_frame["rgb"],
@@ -59,6 +61,8 @@ def perceive_sortable_objects() -> list[dict[str, object]]:
         height=int(camera_config["height"]),
         view_matrix=camera_config["view_matrix"],
         projection_matrix=camera_config["projection_matrix"],
+        near_val=float(camera_config["near_val"]),
+        far_val=float(camera_config["far_val"]),
     )
     detections = estimate_sortable_object_world_positions(
         rgb_image=camera_frame["rgb"],

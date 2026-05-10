@@ -8,6 +8,27 @@ import numpy as np
 import pybullet as p
 
 
+def _reshape_camera_output(
+    values,
+    shape: Tuple[int, ...],
+    dtype,
+    name: str,
+) -> np.ndarray:
+    array = np.asarray(values, dtype=dtype)
+    expected_size = int(np.prod(shape))
+    if array.size != expected_size:
+        raise RuntimeError(
+            f"Camera {name} buffer has {array.size} values; expected {expected_size}"
+        )
+
+    return np.ascontiguousarray(array.reshape(shape))
+
+
+def _write_image(path: Path, image: np.ndarray) -> None:
+    if not cv2.imwrite(str(path), image):
+        raise RuntimeError(f"Failed to write image: {path}")
+
+
 def get_top_down_camera_config() -> Dict[str, object]:
     """
     Create a top-down camera configuration for the simulation scene.
@@ -96,7 +117,7 @@ def capture_camera_frame(
     Capture RGB, depth, depth in meters, and segmentation images from PyBullet.
     """
 
-    _, _, rgba_pixels, depth_pixels, segmentation_pixels = p.getCameraImage(
+    image_width, image_height, rgba_pixels, depth_pixels, segmentation_pixels = p.getCameraImage(
         width=width,
         height=height,
         viewMatrix=view_matrix,
@@ -104,9 +125,29 @@ def capture_camera_frame(
         renderer=p.ER_BULLET_HARDWARE_OPENGL,
     )
 
-    rgba_array = np.array(rgba_pixels, dtype=np.uint8).reshape(height, width, 4)
-    depth_array = np.array(depth_pixels, dtype=np.float32).reshape(height, width)
-    segmentation_array = np.array(segmentation_pixels, dtype=np.int32).reshape(height, width)
+    if image_width != width or image_height != height:
+        raise RuntimeError(
+            f"Camera returned {image_width}x{image_height}; expected {width}x{height}"
+        )
+
+    rgba_array = _reshape_camera_output(
+        rgba_pixels,
+        (height, width, 4),
+        np.uint8,
+        "RGBA",
+    )
+    depth_array = _reshape_camera_output(
+        depth_pixels,
+        (height, width),
+        np.float32,
+        "depth",
+    )
+    segmentation_array = _reshape_camera_output(
+        segmentation_pixels,
+        (height, width),
+        np.int32,
+        "segmentation",
+    )
 
     depth_meters = depth_buffer_to_meters(
         depth_buffer=depth_array,
@@ -115,7 +156,7 @@ def capture_camera_frame(
     )
 
     return {
-        "rgb": rgba_array[:, :, :3],
+        "rgb": np.ascontiguousarray(rgba_array[:, :, :3]),
         "depth": depth_array,
         "depth_meters": depth_meters,
         "segmentation": segmentation_array,
@@ -206,7 +247,7 @@ def save_camera_frame(
     # Save RGB image.
     # OpenCV uses BGR format, so RGB must be converted to BGR before saving.
     rgb_bgr = cv2.cvtColor(rgb_image, cv2.COLOR_RGB2BGR)
-    cv2.imwrite(str(output_path / "rgb.png"), rgb_bgr)
+    _write_image(output_path / "rgb.png", rgb_bgr)
 
     # Save depth image as a visible grayscale image.
     depth_normalized = cv2.normalize(
@@ -217,7 +258,7 @@ def save_camera_frame(
         norm_type=cv2.NORM_MINMAX,
     )
     depth_uint8 = depth_normalized.astype(np.uint8)
-    cv2.imwrite(str(output_path / "depth.png"), depth_uint8)
+    _write_image(output_path / "depth.png", depth_uint8)
 
     # Save segmentation image if available.
     if "segmentation" in frame:
@@ -231,7 +272,7 @@ def save_camera_frame(
             norm_type=cv2.NORM_MINMAX,
         )
         segmentation_uint8 = segmentation_normalized.astype(np.uint8)
-        cv2.imwrite(str(output_path / "segmentation.png"), segmentation_uint8)
+        _write_image(output_path / "segmentation.png", segmentation_uint8)
 
     print(f"Camera frame saved to: {output_path.resolve()}")
 
