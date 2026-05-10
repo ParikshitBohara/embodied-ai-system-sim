@@ -11,14 +11,15 @@ from robot.control import (
     move_to_home,
     step_simulation,
 )
-from robot.gripper import SimulatedGripper
+from robot.gripper import KukaWSG50Gripper
 
 
-APPROACH_HEIGHT = 0.25
-GRASP_HEIGHT_OFFSET = 0.12
+APPROACH_HEIGHT = 0.35
+GRASP_HEIGHT_OFFSET = 0.20
 MOVE_STEPS = 180
 CUBE_HALF_EXTENT = 0.025
 SORT_ORDER = ("red_cube", "blue_sphere", "yellow_rectangle")
+GRIPPER_DOWN_ORIENTATION = p.getQuaternionFromEuler([0.0, 3.14159, 0.0])
 
 
 def _body_position(body_id: int) -> tuple[float, float, float]:
@@ -90,13 +91,17 @@ def _detections_by_class(detections: list[dict[str, object]]) -> dict[str, dict[
 
 
 def _move_and_wait(robot_id: int, position: tuple[float, float, float], steps: int = MOVE_STEPS) -> None:
-    move_end_effector_to_position(robot_id, position)
+    move_end_effector_to_position(
+        robot_id,
+        position,
+        target_orientation=GRIPPER_DOWN_ORIENTATION,
+    )
     step_simulation(steps)
 
 
 def execute_pick_sequence(
     robot_id: int,
-    gripper: SimulatedGripper,
+    gripper: KukaWSG50Gripper,
     object_id: int,
     object_position: tuple[float, float, float] | None = None,
 ) -> None:
@@ -112,7 +117,7 @@ def execute_pick_sequence(
 
 def execute_place_sequence(
     robot_id: int,
-    gripper: SimulatedGripper,
+    gripper: KukaWSG50Gripper,
     target_zone_id: int,
 ) -> None:
     target_x, target_y, target_z = _body_position(target_zone_id)
@@ -133,7 +138,7 @@ def run_pick_and_place_workflow(robot_id: int, cube_id: int, target_zone_id: int
         perceived_cube_position = _body_position(cube_id)
         print(f"[INFO] Falling back to simulator cube pose: {perceived_cube_position}")
 
-    gripper = SimulatedGripper(robot_id)
+    gripper = KukaWSG50Gripper(robot_id)
     execute_pick_sequence(robot_id, gripper, cube_id, perceived_cube_position)
     execute_place_sequence(robot_id, gripper, target_zone_id)
     move_to_home(robot_id)
@@ -149,7 +154,7 @@ def run_sorting_workflow(
     move_to_home(robot_id)
     step_simulation(240)
 
-    gripper = SimulatedGripper(robot_id)
+    gripper = KukaWSG50Gripper(robot_id)
     detections = perceive_sortable_objects()
     detections_by_class = _detections_by_class(detections)
     assignments = target_assignments or {}

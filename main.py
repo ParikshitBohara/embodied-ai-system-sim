@@ -9,6 +9,7 @@ from perception.camera_utils import (
     get_top_down_camera_config,
 )
 from robot.control import move_to_home, step_simulation
+from robot.gripper import KukaWSG50Gripper
 from robot.robot_loader import load_robot
 from tasks.pick_place import run_sorting_workflow
 
@@ -82,6 +83,7 @@ def reset_demo(robot_id: int, object_bodies: dict[str, int]) -> None:
         )
 
     move_to_home(robot_id)
+    KukaWSG50Gripper(robot_id).open()
     step_simulation(240)
 
 
@@ -119,6 +121,9 @@ def main() -> None:
 
     print("Scene initialized.")
     print(f"Robot ID:       {robot_info['robot_id']}")
+    print(f"Robot Model:    {robot_info['name']}")
+    print(f"Arm Joints:     {robot_info['arm_joint_indices']}")
+    print(f"Gripper Joints: {robot_info['gripper_joint_indices']}")
     print(f"Objects:        {scene['object_bodies']}")
     print(f"Target Zones:   {scene['target_zones']}")
 
