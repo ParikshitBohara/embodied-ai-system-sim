@@ -47,4 +47,9 @@ This launches a PyBullet GUI scene with:
 - Identified robot instability issue (spinning)  
 - Created GitHub issues for Sprint 3 tasks  
 - Preparing for integration and testing phase
-- Documented identified system issue (robot instability)  
+- Documented identified system issue (robot instability)
+
+- ## Sprint 4 Updates
+- Improved workflow optimisation notes
+- Continued task logic refinement
+- Reviewed workflow reliability and edge case handling
