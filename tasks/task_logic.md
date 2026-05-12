@@ -45,3 +45,8 @@ Perception -> Task Logic -> Robot Control -> Execution
 - Improved handling for missing or incorrectly detected objects
 - Reviewed task sequencing for pick-and-place workflow
 - Improved workflow reliability during testing
+
+### Workflow Improvements
+- Reviewed sorting workflow execution
+- Improved handling for workflow edge cases
+- Continued testing and optimisation of task logic
