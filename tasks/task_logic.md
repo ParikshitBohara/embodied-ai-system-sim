@@ -37,4 +37,11 @@ Perception -> Task Logic -> Robot Control -> Execution
   ## Sprint 3 Progress
 - Started planning integration between task logic and robot module  
 - Identified robot movement instability (spinning issue)  
-- Preparing for module integration and testing  
+- Preparing for module integration and testing
+
+- ### Sprint 4 Optimisation Updates
+
+- Refined sorting workflow logic
+- Improved handling for missing or incorrectly detected objects
+- Reviewed task sequencing for pick-and-place workflow
+- Improved workflow reliability during testing
