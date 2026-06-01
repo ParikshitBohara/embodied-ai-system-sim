@@ -53,3 +53,15 @@ This launches a PyBullet GUI scene with:
 - Improved workflow optimisation notes
 - Continued task logic refinement
 - Reviewed workflow reliability and edge case handling
+
+
+Project Structure
+- environment
+- perception
+- robot
+- tasks
+
+Dependencies
+- pybullet
+- numpy
+- opencv-python
